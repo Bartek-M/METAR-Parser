@@ -1,0 +1,8 @@
+{
+    "api": "https://metar.vatsim.net/",
+    "stations": [
+        "EPWA",
+        "EPGD",
+        "EPKK"
+    ]
+}
