@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -17,9 +18,11 @@ type Config struct {
 }
 
 type Weather struct {
+	station   string
 	time      string
 	windDir   string
 	windSpeed string
+	qnh       string
 	metar     string
 }
 
@@ -58,13 +61,23 @@ func fetchData(station string, url string) ([]string, error) {
 	return strings.Split(string(body), "\n"), nil
 }
 
-func parseMetar(metar []string) Weather {
+func parseMetar(val string) (Weather, error) {
+	metar := strings.Split(val, " ")
+
+	reQNH := regexp.MustCompile(`Q(\d{4})`)
+	matchQNH := reQNH.FindString(val)
+
+	reWind := regexp.MustCompile(`(\d{3})(\d{2})(G(\d{2}))?KT`)
+	matchWind := reWind.FindStringSubmatch(val)
+
 	return Weather{
-		time:  metar[1],
-		windDir: metar[2][:3],
-		windSpeed: metar[2][3:5],
-		metar: strings.Join(metar[3:], " "),
-	}
+		station:   metar[0],
+		time:      metar[1],
+		windDir:   matchWind[1],
+		windSpeed: matchWind[2],
+		qnh:       matchQNH,
+		metar:     val,
+	}, nil
 }
 
 func filterData(data map[string]Weather, exclude []string) {
@@ -91,8 +104,10 @@ func main() {
 
 	data := make(map[string]Weather)
 	for _, val := range fetched {
-		metar := strings.Split(val, " ")
-		data[metar[0]] = parseMetar(metar)
+		parsed, err := parseMetar(val)
+		handleError(err, "Failed to parse METAR")
+
+		data[parsed.station] = parsed
 	}
 
 	filterData(data, config.Exclude)
