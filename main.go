@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -20,6 +21,7 @@ type Config struct {
 type Weather struct {
 	station   string
 	time      string
+	wind      string
 	windDir   string
 	windSpeed string
 	qnh       string
@@ -61,18 +63,25 @@ func fetchData(station string, url string) ([]string, error) {
 	return strings.Split(string(body), "\n"), nil
 }
 
-func parseMetar(val string) (Weather, error) {
+func parseMetar(val string) (*Weather, error) {
 	metar := strings.Split(val, " ")
 
 	reQNH := regexp.MustCompile(`Q(\d{4})`)
 	matchQNH := reQNH.FindString(val)
+	if matchQNH == "" {
+		return nil, fmt.Errorf("METAR incomplete, error parsing QNH")
+	}
 
-	reWind := regexp.MustCompile(`(\d{3})(\d{2})(G(\d{2}))?KT`)
+	reWind := regexp.MustCompile(`(\w{3})(\d{2})(G(\d{2}))?KT`)
 	matchWind := reWind.FindStringSubmatch(val)
+	if matchWind == nil {
+		return nil, fmt.Errorf("METAR incomplete, error parsing wind")
+	}
 
-	return Weather{
+	return &Weather{
 		station:   metar[0],
 		time:      metar[1],
+		wind:      matchWind[0],
 		windDir:   matchWind[1],
 		windSpeed: matchWind[2],
 		qnh:       matchQNH,
@@ -81,8 +90,21 @@ func parseMetar(val string) (Weather, error) {
 }
 
 func filterData(data map[string]Weather, exclude []string) {
-	for _, val := range exclude {
-		delete(data, val)
+	for _, item := range exclude {
+		delete(data, item)
+	}
+}
+
+func outputData(data map[string]Weather) {
+	stations := make([]string, 0, len(data))
+	for station := range data {
+		stations = append(stations, station)
+	}
+
+	sort.Strings(stations)
+	for _, station := range stations {
+		weather := data[station]
+		fmt.Printf("%s %s %s\n", station, weather.wind, weather.qnh)
 	}
 }
 
@@ -107,9 +129,9 @@ func main() {
 		parsed, err := parseMetar(val)
 		handleError(err, "Failed to parse METAR")
 
-		data[parsed.station] = parsed
+		data[parsed.station] = *parsed
 	}
 
 	filterData(data, config.Exclude)
-	fmt.Printf("Data: %v", data)
+	outputData(data)
 }
