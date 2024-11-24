@@ -1,8 +1,10 @@
 {
     "api": "https://metar.vatsim.net/",
+    "interval": 60,
     "stations": [
-        "EPWA",
-        "EPGD",
-        "EPKK"
+        "EP"
+    ],
+    "exclude": [
+        "EPIR"
     ]
 }
