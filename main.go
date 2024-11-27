@@ -1,50 +1,27 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 )
-
-type Config struct {
-	API      string
-	Interval int
-	Stations []string
-	Exclude  []string
-}
 
 type Weather struct {
 	station   string
 	time      string
-	wind      string
-	windDir   string
-	windSpeed string
+	windDir   int
+	windSpeed int
 	qnh       string
-	metar     string
-}
-
-func openConfig() (*Config, error) {
-	file, err := os.Open("./config.json")
-	if err != nil {
-		return nil, err
-	}
-
-	defer file.Close()
-
-	decoder := json.NewDecoder(file)
-	var data Config
-
-	err = decoder.Decode(&data)
-	if err != nil {
-		return nil, err
-	}
-
-	return &data, nil
+	// lastQnh   string ""
+	depRwy string
+	arrRwy string
+	metar  string
 }
 
 func fetchData(station string, url string) ([]string, error) {
@@ -63,29 +40,30 @@ func fetchData(station string, url string) ([]string, error) {
 	return strings.Split(string(body), "\n"), nil
 }
 
-func parseMetar(val string) (*Weather, error) {
-	metar := strings.Split(val, " ")
+func parseMetar(metar string) (*Weather, error) {
+	splitMetar := strings.Split(metar, " ")
 
 	reQNH := regexp.MustCompile(`Q(\d{4})`)
-	matchQNH := reQNH.FindString(val)
-	if matchQNH == "" {
-		return nil, fmt.Errorf("METAR incomplete, error parsing QNH")
+	reWind := regexp.MustCompile(`(\w{3})(\d{2})(G(\d{2}))?KT`)
+
+	qnh := reQNH.FindString(metar)
+	wind := reWind.FindStringSubmatch(metar)
+	if qnh == "" || wind == nil {
+		return nil, fmt.Errorf("METAR incomplete, failed parsing QNH / wind")
 	}
 
-	reWind := regexp.MustCompile(`(\w{3})(\d{2})(G(\d{2}))?KT`)
-	matchWind := reWind.FindStringSubmatch(val)
-	if matchWind == nil {
-		return nil, fmt.Errorf("METAR incomplete, error parsing wind")
-	}
+	windDir, _ := strconv.Atoi(wind[1])
+	windSpeed, _ := strconv.Atoi(wind[2])
 
 	return &Weather{
-		station:   metar[0],
-		time:      metar[1],
-		wind:      matchWind[0],
-		windDir:   matchWind[1],
-		windSpeed: matchWind[2],
-		qnh:       matchQNH,
-		metar:     val,
+		station:   splitMetar[0],
+		time:      splitMetar[1],
+		windDir:   windDir,
+		windSpeed: windSpeed,
+		qnh:       qnh,
+		depRwy:    "--",
+		arrRwy:    "--",
+		metar:     metar,
 	}, nil
 }
 
@@ -104,7 +82,7 @@ func outputData(data map[string]Weather) {
 	sort.Strings(stations)
 	for _, station := range stations {
 		weather := data[station]
-		fmt.Printf("%s %s %s\n", station, weather.wind, weather.qnh)
+		fmt.Printf("%s/%s | %s\n", weather.depRwy, weather.arrRwy, weather.metar)
 	}
 }
 
@@ -116,22 +94,37 @@ func handleError(err error, message string) {
 }
 
 func main() {
-	fmt.Printf("[METAR]\n\n")
-
 	config, err := openConfig()
 	handleError(err, "Failed to load configuration")
 
-	fetched, err := fetchData(config.Stations[0], config.API)
-	handleError(err, "Failed to fetch API data")
-
 	data := make(map[string]Weather)
-	for _, val := range fetched {
-		parsed, err := parseMetar(val)
-		handleError(err, "Failed to parse METAR")
 
-		data[parsed.station] = *parsed
+	for {
+		now := time.Now().UTC()
+		fmt.Printf("METAR Parser - %s\n\n", fmt.Sprintf("%d%d%d0Z", now.Day(), now.Hour(), now.Minute()/30*3))
+
+		var metars []string
+		for _, station := range config.Stations {
+			fetched, err := fetchData(station, config.API)
+			handleError(err, "Failed to fetch API data")
+			metars = append(metars, fetched...)
+		}
+
+		for _, val := range metars {
+			parsed, err := parseMetar(val)
+			handleError(err, "Failed to parse METAR")
+
+			assignRunways(parsed, config.WindLimit, config.Runways)
+			data[parsed.station] = *parsed
+		}
+
+		filterData(data, config.Exclude)
+		outputData(data)
+
+		if config.Interval == -1 {
+			break
+		}
+		time.Sleep(time.Duration(config.Interval * int(time.Second)))
+		fmt.Print("\033[H\033[2J") // clear terminal
 	}
-
-	filterData(data, config.Exclude)
-	outputData(data)
 }
