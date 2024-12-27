@@ -67,9 +67,13 @@ func parseMetar(metar string) (*Weather, error) {
 	}, nil
 }
 
-func filterData(data map[string]Weather, exclude []string) {
-	for _, item := range exclude {
-		delete(data, item)
+func filterData(data map[string]Weather, airports map[string]Airport) {
+	for station := range data {
+		if _, exists := airports[station]; exists {
+			continue
+		}
+
+		delete(data, station)
 	}
 }
 
@@ -114,11 +118,11 @@ func main() {
 			parsed, err := parseMetar(val)
 			handleError(err, "Failed to parse METAR")
 
-			assignRunways(parsed, config.WindLimit, config.Runways)
+			assignRunways(parsed, config.WindLimit, config.Airports)
 			data[parsed.station] = *parsed
 		}
 
-		filterData(data, config.Exclude)
+		filterData(data, config.Airports)
 		outputData(data)
 
 		if config.Interval == -1 {

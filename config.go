@@ -9,14 +9,12 @@ type Config struct {
 	API       string
 	Interval  int
 	Stations  []string
-	Exclude   []string
 	WindLimit int
-	Runways   map[string][]Runways
+	Airports  map[string]Airport
 }
 
-type Runways struct {
-	Id      string
-	Hdg int
+type Airport struct {
+	Runways map[string]int
 }
 
 func openConfig() (*Config, error) {

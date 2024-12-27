@@ -1,29 +1,29 @@
 package main
 
 import (
-	"math"
+	// "math"
 )
 
-func assignRunways(weather *Weather, windLimit int, runwayConfig map[string][]Runways) {
-	station := weather.station
-	if _, exists := runwayConfig[station]; !exists {
-		return
-	}
+func assignRunways(weather *Weather, windLimit int, runwayConfig map[string]Airport) {
+	// station := weather.station
+	// if _, exists := runwayConfig[station]; !exists {
+	// 	return
+	// }
 
-	var depRwy string
-	var arrRwy string
+	// var depRwy string
+	// var arrRwy string
 
-	for _, rwy := range runwayConfig[station] {
-		if weather.windSpeed > windLimit &&
-			math.Abs(float64((weather.windDir-rwy.Hdg+180)%360-180)) > 90 {
-			continue
-		}
+	// for _, rwy := range runwayConfig[station] {
+	// 	if weather.windSpeed > windLimit &&
+	// 		math.Abs(float64((weather.windDir-rwy.Hdg+180)%360-180)) > 90 {
+	// 		continue
+	// 	}
 
-		depRwy = rwy.Id
-		arrRwy = rwy.Id
-		break
-	}
+	// 	depRwy = rwy.Id
+	// 	arrRwy = rwy.Id
+	// 	break
+	// }
 
-	weather.depRwy = depRwy
-	weather.arrRwy = arrRwy
+	// weather.depRwy = depRwy
+	// weather.arrRwy = arrRwy
 }
