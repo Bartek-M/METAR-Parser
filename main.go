@@ -72,7 +72,6 @@ func filterData(data map[string]Weather, airports map[string]Airport) {
 		if _, exists := airports[station]; exists {
 			continue
 		}
-
 		delete(data, station)
 	}
 }
@@ -105,6 +104,7 @@ func main() {
 
 	for {
 		now := time.Now().UTC()
+		fmt.Print("\033[H\033[2J") // clear terminal
 		fmt.Printf("METAR Parser - %s\n\n", fmt.Sprintf("%d%d%d0Z", now.Day(), now.Hour(), now.Minute()/30*3))
 
 		var metars []string
@@ -122,13 +122,14 @@ func main() {
 			data[parsed.station] = *parsed
 		}
 
-		filterData(data, config.Airports)
+		if config.ExcludeNoConfig {
+			filterData(data, config.Airports)
+		}
 		outputData(data)
 
 		if config.Interval == -1 {
 			break
 		}
 		time.Sleep(time.Duration(config.Interval * int(time.Second)))
-		fmt.Print("\033[H\033[2J") // clear terminal
 	}
 }

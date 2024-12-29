@@ -6,15 +6,19 @@ import (
 )
 
 type Config struct {
-	API       string
-	Interval  int
-	Stations  []string
-	WindLimit int
-	Airports  map[string]Airport
+	API             string
+	Interval        int
+	Stations        []string
+	ExcludeNoConfig bool
+	WindLimit       int
+	Airports        map[string]Airport
 }
 
 type Airport struct {
-	Runways map[string]int
+	Runways []struct {
+		Id string
+		Hdg int
+	}
 }
 
 func openConfig() (*Config, error) {
