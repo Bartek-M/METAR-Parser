@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-func assignRunways(weather *Weather, windLimit int, airports map[string]Airport) {
+func assignRunways(weather *Weather, windLimit [2]int, airports map[string]Airport) {
 	station := weather.station
 	if _, exists := airports[station]; !exists {
 		return
@@ -14,7 +14,7 @@ func assignRunways(weather *Weather, windLimit int, airports map[string]Airport)
 	var arrRwy string
 
 	for _, rwy := range airports[station].Runways {
-		if weather.windSpeed > windLimit &&
+		if weather.windSpeed > windLimit[0] &&
 			math.Abs(float64((weather.windDir-rwy.Hdg+180)%360-180)) > 90 {
 			continue
 		}

@@ -5,24 +5,10 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
-
-type Weather struct {
-	station   string
-	time      string
-	windDir   int
-	windSpeed int
-	qnh       string
-	// lastQnh   string ""
-	depRwy string
-	arrRwy string
-	metar  string
-}
 
 func fetchData(station string, url string) ([]string, error) {
 	resp, err := http.Get(url + station)
@@ -38,33 +24,6 @@ func fetchData(station string, url string) ([]string, error) {
 	}
 
 	return strings.Split(string(body), "\n"), nil
-}
-
-func parseMetar(metar string) (*Weather, error) {
-	splitMetar := strings.Split(metar, " ")
-
-	reQNH := regexp.MustCompile(`Q(\d{4})`)
-	reWind := regexp.MustCompile(`(\w{3})(\d{2})(G(\d{2}))?KT`)
-
-	qnh := reQNH.FindString(metar)
-	wind := reWind.FindStringSubmatch(metar)
-	if qnh == "" || wind == nil {
-		return nil, fmt.Errorf("METAR incomplete, failed parsing QNH / wind")
-	}
-
-	windDir, _ := strconv.Atoi(wind[1])
-	windSpeed, _ := strconv.Atoi(wind[2])
-
-	return &Weather{
-		station:   splitMetar[0],
-		time:      splitMetar[1],
-		windDir:   windDir,
-		windSpeed: windSpeed,
-		qnh:       qnh,
-		depRwy:    "--",
-		arrRwy:    "--",
-		metar:     metar,
-	}, nil
 }
 
 func filterData(data map[string]Weather, airports map[string]Airport) {
@@ -85,7 +44,7 @@ func outputData(data map[string]Weather) {
 	sort.Strings(stations)
 	for _, station := range stations {
 		weather := data[station]
-		fmt.Printf("%s/%s | %s\n", weather.depRwy, weather.arrRwy, weather.metar)
+		fmt.Printf("%s | %s/%s | %s\n", weather.category, weather.depRwy, weather.arrRwy, weather.metar)
 	}
 }
 
@@ -104,8 +63,13 @@ func main() {
 
 	for {
 		now := time.Now().UTC()
+		spacer := ""
+		if now.Day() < 10 {
+			spacer = "0"
+		}
+
 		fmt.Print("\033[H\033[2J") // clear terminal
-		fmt.Printf("METAR Parser - %s\n\n", fmt.Sprintf("%d%d%d0Z", now.Day(), now.Hour(), now.Minute()/30*3))
+		fmt.Printf("METAR Parser - %s\n\n", fmt.Sprintf("%s%d%d%d0Z", spacer, now.Day(), now.Hour(), now.Minute()/10))
 
 		var metars []string
 		for _, station := range config.Stations {
@@ -117,6 +81,7 @@ func main() {
 		for _, val := range metars {
 			parsed, err := parseMetar(val)
 			handleError(err, "Failed to parse METAR")
+			fmt.Printf("%v\n", parsed)
 
 			assignRunways(parsed, config.WindLimit, config.Airports)
 			data[parsed.station] = *parsed

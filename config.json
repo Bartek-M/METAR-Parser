@@ -6,83 +6,88 @@
         "EDDB"
     ],
     "excludeNoConfig": true,
-    "windLimit": 7,
+    "minimums": {
+        "category": ["vfr", "mvfr", "ifr", "lifr"],
+        "visibility": [8000, 5000, 1500, 0],
+        "ceiling": [3000, 1000, 500, 0]
+    },
+    "windLimits": [7, 18],
     "airports": {
         "EDDB": {
             "runways": [
-                {"id": "24", "hdg": 244},
-                {"id": "06", "hdg": 64}
+                {"id": "24", "hdg": 244, "ils": true},
+                {"id": "06", "hdg": 64, "ils": true}
             ]
         },
         "EPBY": {
             "runways": [
-                {"id": "26", "hdg": 262},
+                {"id": "26", "hdg": 262, "ils": true},
                 {"id": "08", "hdg": 82}
             ]
         },
         "EPGD": {
             "runways": [
-                {"id": "29", "hdg": 291},
+                {"id": "29", "hdg": 291, "ils": true},
                 {"id": "11", "hdg": 113}
             ]
         },
         "EPKK": {
             "runways": [
-                {"id": "25", "hdg": 258},
+                {"id": "25", "hdg": 258, "ils": true},
                 {"id": "07", "hdg": 78}
             ]
         },
         "EPKT": {
             "runways": [
-                {"id": "26", "hdg": 270},
+                {"id": "26", "hdg": 270, "ils": true},
                 {"id": "08", "hdg": 90}
             ]
         },
         "EPLB": {
             "runways": [
-                {"id": "25", "hdg": 257},
+                {"id": "25", "hdg": 257, "ils": true},
                 {"id": "07", "hdg": 77}
             ]
         },
         "EPLL": {
             "runways": [
-                {"id": "25", "hdg": 251},
+                {"id": "25", "hdg": 251, "ils": true},
                 {"id": "07", "hdg": 71}
             ]
         },
         "EPMO": {
             "runways": [
                 {"id": "26", "hdg": 261},
-                {"id": "08", "hdg": 81}
+                {"id": "08", "hdg": 81, "ils": true}
             ]
         },
         "EPPO": {
             "runways": [
-                {"id": "28", "hdg": 288},
+                {"id": "28", "hdg": 288, "ils": true},
                 {"id": "10", "hdg": 108}
             ]
         },
         "EPRA": {
             "runways": [
-                {"id": "25", "hdg": 255},
+                {"id": "25", "hdg": 255, "ils": true},
                 {"id": "07", "hdg": 75}
             ]
         },
         "EPRZ": {
             "runways": [
-                {"id": "27", "hdg": 271},
+                {"id": "27", "hdg": 271, "ils": true},
                 {"id": "09", "hdg": 91}
             ]
         },
         "EPSC": {
             "runways": [
-                {"id": "31", "hdg": 311},
+                {"id": "31", "hdg": 311, "ils": true},
                 {"id": "13", "hdg": 131}
             ]
         },
         "EPSY": {
             "runways": [
-                {"id": "01", "hdg": 19},
+                {"id": "01", "hdg": 19, "ils": true},
                 {"id": "19", "hdg": 199}
             ]
         },
@@ -90,19 +95,20 @@
             "runways": [
                 {"id": "29", "hdg": 295},
                 {"id": "15", "hdg": 146},
-                {"id": "33", "hdg": 326},
-                {"id": "11", "hdg": 108}
-            ]
+                {"id": "33", "hdg": 326, "ils": true},
+                {"id": "11", "hdg": 108, "ils": true}
+            ],
+            "lvp": [550, 200]
         },
         "EPWR": {
             "runways": [
-                {"id": "29", "hdg": 296},
+                {"id": "29", "hdg": 296, "ils": true},
                 {"id": "11", "hdg": 116}
             ]
         },
         "EPZG": {
             "runways": [
-                {"id": "24", "hdg": 241},
+                {"id": "24", "hdg": 241, "ils": true},
                 {"id": "06", "hdg": 61}
             ]
         }

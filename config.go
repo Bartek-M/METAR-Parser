@@ -10,15 +10,24 @@ type Config struct {
 	Interval        int
 	Stations        []string
 	ExcludeNoConfig bool
-	WindLimit       int
+	Minimums        Minimums
+	WindLimit       [2]int
 	Airports        map[string]Airport
+}
+
+type Minimums struct {
+	Category   [4]string
+	Visibility [4]int
+	Ceiling    [4]int
 }
 
 type Airport struct {
 	Runways []struct {
-		Id string
+		Id  string
 		Hdg int
+		ILS bool
 	}
+	LVP [2]int
 }
 
 func openConfig() (*Config, error) {
