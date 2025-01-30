@@ -10,8 +10,8 @@ func assignRunways(weather *Weather, windLimit [2]int, airports map[string]Airpo
 		return
 	}
 
-	var depRwy string
-	var arrRwy string
+	depRwy := "--"
+	arrRwy := "--"
 
 	for _, rwy := range airports[station].Runways {
 		if weather.windSpeed > windLimit[0] &&

@@ -27,6 +27,10 @@ type Airport struct {
 		Hdg int
 		ILS bool
 	}
+	Preference struct {
+		Dep []string
+		Arr []string
+	}
 	LVP [2]int
 }
 

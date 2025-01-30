@@ -7,7 +7,7 @@
     ],
     "excludeNoConfig": true,
     "minimums": {
-        "category": ["vfr", "mvfr", "ifr", "lifr"],
+        "category": ["VFR", "MVFR", "IFR", "LIFR"],
         "visibility": [8000, 5000, 1500, 0],
         "ceiling": [3000, 1000, 500, 0]
     },
@@ -98,6 +98,10 @@
                 {"id": "33", "hdg": 326, "ils": true},
                 {"id": "11", "hdg": 108, "ils": true}
             ],
+            "preference": {
+                "dep": ["29", "15", "33", "11"],
+                "arr": ["33", "11", "15", "29"]
+            },
             "lvp": [550, 200]
         },
         "EPWR": {

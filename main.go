@@ -44,7 +44,9 @@ func outputData(data map[string]Weather) {
 	sort.Strings(stations)
 	for _, station := range stations {
 		weather := data[station]
-		fmt.Printf("%s | %s/%s | %s\n", weather.category, weather.depRwy, weather.arrRwy, weather.metar)
+		category := weather.category
+
+		fmt.Printf("%5s | %s/%s | %s\n", category, weather.depRwy, weather.arrRwy, weather.metar)
 	}
 }
 
@@ -79,9 +81,8 @@ func main() {
 		}
 
 		for _, val := range metars {
-			parsed, err := parseMetar(val)
+			parsed, err := parseMetar(val, config.Minimums)
 			handleError(err, "Failed to parse METAR")
-			fmt.Printf("%v\n", parsed)
 
 			assignRunways(parsed, config.WindLimit, config.Airports)
 			data[parsed.station] = *parsed

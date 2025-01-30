@@ -53,11 +53,15 @@ func parseVisibility(metar string) (int, error) {
 
 func parseClouds(metar string) []int {
 	if strings.Contains(metar, "CAVOK") {
-		return []int{}
+		return []int{9999}
 	}
 
 	reClouds := regexp.MustCompile(`(?:FEW|SCT|BKN|OVC)(\d{3})`)
 	cloudMatches := reClouds.FindAllStringSubmatch(metar, -1)
+
+	if len(cloudMatches) < 1 {
+		return []int{9999}
+	}
 
 	var clouds []int
 	for _, match := range cloudMatches {
@@ -76,7 +80,19 @@ func parseQNH(metar string) string {
 	return qnh
 }
 
-func parseMetar(metar string) (*Weather, error) {
+func getCategory(visibility int, clouds []int, minimums Minimums) string {
+	for i := range 4 {
+		if visibility < minimums.Visibility[i] || clouds[0] < minimums.Ceiling[i] {
+			continue
+		}
+
+		return minimums.Category[i]
+	}
+
+	return "UNKN"
+}
+
+func parseMetar(metar string, minimums Minimums) (*Weather, error) {
 	splitMetar := strings.Split(metar, " ")
 
 	windDir, windSpeed, err := parseWind(metar)
@@ -95,6 +111,8 @@ func parseMetar(metar string) (*Weather, error) {
 		return nil, fmt.Errorf("failed parsing QNH")
 	}
 
+	category := getCategory(vis, clouds, minimums)
+
 	return &Weather{
 		station:   splitMetar[0],
 		time:      splitMetar[1],
@@ -105,7 +123,7 @@ func parseMetar(metar string) (*Weather, error) {
 		clouds:    clouds,
 		depRwy:    "--",
 		arrRwy:    "--",
-		category:  "VFR",
+		category:  category,
 		metar:     metar,
 	}, nil
 }
