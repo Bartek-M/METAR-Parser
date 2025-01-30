@@ -62,36 +62,47 @@ func main() {
 	handleError(err, "Failed to load configuration")
 
 	data := make(map[string]Weather)
+	var lastMetars map[string]string
 
 	for {
 		now := time.Now().UTC()
-		spacer := ""
-		if now.Day() < 10 {
-			spacer = "0"
-		}
-
 		fmt.Print("\033[H\033[2J") // clear terminal
-		fmt.Printf("METAR Parser - %s\n\n", fmt.Sprintf("%s%d%d%d0Z", spacer, now.Day(), now.Hour(), now.Minute()/10))
+		fmt.Printf("METAR Parser - %s\n\n", fmt.Sprintf("%02d%d%d0Z", now.Day(), now.Hour(), now.Minute()/10))
 
-		var metars []string
+		metars := make(map[string]string)
 		for _, station := range config.Stations {
 			fetched, err := fetchData(station, config.API)
 			handleError(err, "Failed to fetch API data")
-			metars = append(metars, fetched...)
+			
+			for _, metar := range fetched {
+				icao := strings.Split(metar, " ")[0]
+				metars[icao] = metar
+			}
 		}
 
-		for _, val := range metars {
-			parsed, err := parseMetar(val, config.Minimums)
+		for station, metar := range metars {
+			if metar == lastMetars[station] {
+				continue
+			}
+
+			parsed, err := parseMetar(metar, config.Minimums)
 			handleError(err, "Failed to parse METAR")
 
 			assignRunways(parsed, config.WindLimit, config.Airports)
-			data[parsed.station] = *parsed
+
+			if _, exists := data[station]; exists {
+				parsed.lastQnh = data[station].qnh
+			}
+			
+			fmt.Printf("%v\n", parsed)
+			data[station] = *parsed
 		}
 
 		if config.ExcludeNoConfig {
 			filterData(data, config.Airports)
 		}
 		outputData(data)
+		lastMetars = metars
 
 		if config.Interval == -1 {
 			break

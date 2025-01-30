@@ -13,13 +13,13 @@ type Weather struct {
 	windDir   int
 	windSpeed int
 	qnh       string
-	// lastQnh   string ""
-	vis      int
-	clouds   []int
-	depRwy   string
-	arrRwy   string
-	category string
-	metar    string
+	lastQnh   string
+	vis       int
+	clouds    []int
+	depRwy    string
+	arrRwy    string
+	category  string
+	metar     string
 }
 
 func parseWind(metar string) (int, int, error) {
@@ -119,6 +119,7 @@ func parseMetar(metar string, minimums Minimums) (*Weather, error) {
 		windDir:   windDir,
 		windSpeed: windSpeed,
 		qnh:       qnh,
+		lastQnh:   "",
 		vis:       vis,
 		clouds:    clouds,
 		depRwy:    "--",
