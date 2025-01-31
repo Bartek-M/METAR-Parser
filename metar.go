@@ -18,7 +18,7 @@ type Weather struct {
 	clouds    []int
 	depRwy    string
 	arrRwy    string
-	category  string
+	category  int
 	metar     string
 }
 
@@ -80,16 +80,16 @@ func parseQNH(metar string) string {
 	return qnh
 }
 
-func getCategory(visibility int, clouds []int, minimums Minimums) string {
+func getCategory(visibility int, clouds []int, minimums Minimums) int {
 	for i := range 4 {
 		if visibility < minimums.Visibility[i] || clouds[0] < minimums.Ceiling[i] {
 			continue
 		}
 
-		return minimums.Category[i]
+		return i
 	}
 
-	return "UNKN"
+	return -1
 }
 
 func parseMetar(metar string, minimums Minimums) (*Weather, error) {
@@ -111,8 +111,6 @@ func parseMetar(metar string, minimums Minimums) (*Weather, error) {
 		return nil, fmt.Errorf("failed parsing QNH")
 	}
 
-	category := getCategory(vis, clouds, minimums)
-
 	return &Weather{
 		station:   splitMetar[0],
 		time:      splitMetar[1],
@@ -124,7 +122,7 @@ func parseMetar(metar string, minimums Minimums) (*Weather, error) {
 		clouds:    clouds,
 		depRwy:    "--",
 		arrRwy:    "--",
-		category:  category,
+		category:  getCategory(vis, clouds, minimums),
 		metar:     metar,
 	}, nil
 }

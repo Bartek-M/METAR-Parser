@@ -35,7 +35,7 @@ func filterData(data map[string]Weather, airports map[string]Airport) {
 	}
 }
 
-func outputData(data map[string]Weather) {
+func outputData(data map[string]Weather, minimums Minimums) {
 	stations := make([]string, 0, len(data))
 	for station := range data {
 		stations = append(stations, station)
@@ -44,9 +44,18 @@ func outputData(data map[string]Weather) {
 	sort.Strings(stations)
 	for _, station := range stations {
 		weather := data[station]
-		category := weather.category
 
-		fmt.Printf("%5s | %s/%s | %s\n", category, weather.depRwy, weather.arrRwy, weather.metar)
+		qnhInfo := ""
+		if weather.qnh != weather.lastQnh && weather.lastQnh != "" {
+			qnhInfo = fmt.Sprintf("%5s | ", weather.lastQnh)
+		}
+
+		category := ""
+		if weather.category >= 0 && weather.category < len(minimums.Category) {
+			category = minimums.Category[weather.category]
+		}
+
+		fmt.Printf("%5s | %2s/%2s | %s%s\n", category, weather.depRwy, weather.arrRwy, qnhInfo, weather.metar)
 	}
 }
 
@@ -89,19 +98,18 @@ func main() {
 			handleError(err, "Failed to parse METAR")
 
 			assignRunways(parsed, config.WindLimit, config.Airports)
-
+			
 			if _, exists := data[station]; exists {
 				parsed.lastQnh = data[station].qnh
 			}
-			
-			fmt.Printf("%v\n", parsed)
+
 			data[station] = *parsed
 		}
 
 		if config.ExcludeNoConfig {
 			filterData(data, config.Airports)
 		}
-		outputData(data)
+		outputData(data, config.Minimums)
 		lastMetars = metars
 
 		if config.Interval == -1 {
