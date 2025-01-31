@@ -47,7 +47,7 @@ func outputData(data map[string]Weather, minimums Minimums) {
 
 		qnhInfo := ""
 		if weather.qnh != weather.lastQnh && weather.lastQnh != "" {
-			qnhInfo = fmt.Sprintf("%5s | ", weather.lastQnh)
+			qnhInfo = fmt.Sprintf("%s -> %s | ", weather.qnh, weather.lastQnh)
 		}
 
 		category := ""
@@ -97,12 +97,11 @@ func main() {
 			parsed, err := parseMetar(metar, config.Minimums)
 			handleError(err, "Failed to parse METAR")
 
-			assignRunways(parsed, config.WindLimit, config.Airports)
-			
 			if _, exists := data[station]; exists {
 				parsed.lastQnh = data[station].qnh
 			}
-
+			
+			assignRunways(parsed, config.WindLimit, config.Airports)
 			data[station] = *parsed
 		}
 

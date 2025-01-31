@@ -22,16 +22,18 @@ type Minimums struct {
 }
 
 type Airport struct {
-	Runways []struct {
-		Id  string
-		Hdg int
-		ILS bool
-	}
+	Runways []Runway
 	Preference struct {
 		Dep []string
 		Arr []string
 	}
 	LVP [2]int
+}
+
+type Runway struct {
+	Id  string
+	Hdg int
+	ILS bool
 }
 
 func openConfig() (*Config, error) {
