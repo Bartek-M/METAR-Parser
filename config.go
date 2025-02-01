@@ -22,7 +22,7 @@ type Minimums struct {
 }
 
 type Airport struct {
-	Runways []Runway
+	Runways    []Runway
 	Preference struct {
 		Dep []string
 		Arr []string
@@ -50,6 +50,10 @@ func openConfig() (*Config, error) {
 	err = decoder.Decode(&data)
 	if err != nil {
 		return nil, err
+	}
+
+	if data.Interval < 20 && data.Interval != -1 {
+		data.Interval = 20
 	}
 
 	return &data, nil

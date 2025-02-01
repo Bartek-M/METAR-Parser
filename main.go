@@ -76,7 +76,7 @@ func main() {
 	for {
 		now := time.Now().UTC()
 		fmt.Print("\033[H\033[2J") // clear terminal
-		fmt.Printf("METAR Parser - %s\n\n", fmt.Sprintf("%02d%d%d0Z", now.Day(), now.Hour(), now.Minute()/10))
+		fmt.Printf("METAR Parser - %s\n\n", fmt.Sprintf("%02d%02d%d0Z", now.Day(), now.Hour(), now.Minute()/10))
 
 		metars := make(map[string]string)
 		for _, station := range config.Stations {
@@ -113,7 +113,8 @@ func main() {
 
 		if config.Interval == -1 {
 			break
-		}
+		} 
+
 		time.Sleep(time.Duration(config.Interval * int(time.Second)))
 	}
 }
