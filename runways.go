@@ -22,12 +22,17 @@ func getRwy(ids []string, runways []Runway) []Runway {
 }
 
 func checkRwy(weather *Weather, rwy Runway, windLimit [2]int) bool {
-	currentDirection := math.Abs(float64((weather.windDir-rwy.Hdg+180)%360-180)) > 90
+	windDir := weather.windDir
+	if windDir == 0 {
+		windDir = rwy.Hdg
+	}
 
-	if weather.windSpeed > windLimit[0] && currentDirection {
+	currentDirection := math.Abs(float64((windDir-rwy.Hdg+180)%360-180)) < 90
+
+	if weather.windSpeed > windLimit[0] && !currentDirection {
 		return false
 	}
-	if weather.category > 1 && !rwy.ILS && !(weather.windSpeed > windLimit[1] && currentDirection) {
+	if weather.category > 1 && !rwy.ILS && !(weather.windSpeed > windLimit[1] && !currentDirection) {
 		return false
 	}
 
@@ -39,7 +44,7 @@ func selectRwy(weather *Weather, runways []Runway, windLimit [2]int) string {
 		if !checkRwy(weather, rwy, windLimit) {
 			continue
 		}
-
+		
 		return rwy.Id
 	}
 

@@ -101,7 +101,7 @@ func main() {
 				parsed.lastQnh = data[station].qnh
 			}
 			
-			assignRunways(parsed, config.WindLimit, config.Airports)
+			assignRunways(parsed, config.WindLimits, config.Airports)
 			data[station] = *parsed
 		}
 

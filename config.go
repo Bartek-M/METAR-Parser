@@ -11,7 +11,7 @@ type Config struct {
 	Stations        []string
 	ExcludeNoConfig bool
 	Minimums        Minimums
-	WindLimit       [2]int
+	WindLimits       [2]int
 	Airports        map[string]Airport
 }
 
