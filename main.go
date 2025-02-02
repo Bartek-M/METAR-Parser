@@ -63,6 +63,7 @@ func outputData(data map[string]Weather, minimums Minimums) {
 func handleError(err error, message string) {
 	if err != nil {
 		fmt.Printf("[ERROR] %s: %v\n", message, err)
+		bufio.NewScanner(os.Stdin).Scan()
 		os.Exit(1)
 	}
 }
