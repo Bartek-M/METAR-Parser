@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"net/http"
@@ -117,4 +118,6 @@ func main() {
 
 		time.Sleep(time.Duration(config.Interval * int(time.Second)))
 	}
+
+	bufio.NewScanner(os.Stdin).Scan()
 }
