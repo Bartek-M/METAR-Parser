@@ -1,6 +1,6 @@
 {
     "api": "https://metar.vatsim.net/",
-    "interval": -1,
+    "interval": 300,
     "stations": [
         "EP",
         "EDDB"
@@ -11,7 +11,7 @@
         "visibility": [8000, 5000, 1500, 0],
         "ceiling": [3000, 1000, 500, 0]
     },
-    "windLimits": [7, 18],
+    "windLimits": [5, 18],
     "airports": {
         "EDDB": {
             "runways": [

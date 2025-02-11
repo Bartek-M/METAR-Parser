@@ -27,16 +27,24 @@ func checkRwy(weather *Weather, rwy Runway, windLimit [2]int) bool {
 		windDir = rwy.Hdg
 	}
 
+	valid := true
 	currentDirection := math.Abs(float64((windDir-rwy.Hdg+180)%360-180)) < 90
 
-	if weather.windSpeed > windLimit[0] && !currentDirection {
-		return false
+	if weather.windSpeed >= windLimit[0] && !currentDirection {
+		valid = false
 	}
-	if weather.category > 1 && !rwy.ILS && !(weather.windSpeed > windLimit[1] && !currentDirection) {
-		return false
+	if weather.category > 1 { 
+		if !rwy.ILS {
+			valid = false
+		} else {
+			valid = true
+		}
+	} 
+	if weather.windSpeed >= windLimit[1] && currentDirection {
+		valid = true 
 	}
 
-	return true
+	return valid
 }
 
 func selectRwy(weather *Weather, runways []Runway, windLimit [2]int) string {

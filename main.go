@@ -48,7 +48,7 @@ func outputData(data map[string]Weather, minimums Minimums) {
 
 		qnhInfo := ""
 		if weather.qnh != weather.lastQnh && weather.lastQnh != "" {
-			qnhInfo = fmt.Sprintf("%s -> %s | ", weather.qnh, weather.lastQnh)
+			qnhInfo = fmt.Sprintf("%s -> %s | ", weather.lastQnh, weather.qnh)
 		}
 
 		category := ""
