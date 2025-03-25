@@ -1,9 +1,9 @@
 package types
 
 type Minimums struct {
-	Category   [4]string
-	Visibility [4]int
-	Ceiling    [4]int
+	Category   [4]string `json:"category"`
+	Visibility [4]int    `json:"visibility"`
+	Ceiling    [4]int    `json:"ceiling"`
 }
 
 type Weather struct {

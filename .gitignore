@@ -1,6 +1,7 @@
 .vscode/
+build/
 
-METAR-Parser.*
+METAR-Parser*
 
 *.exe
 *.zip

@@ -53,7 +53,7 @@ METAR string \n
     > **NOTE:** if no runway preference specified, runways will be used in order
 
 
-### JSON structure:
+### JSON structure
 ```json
 {
     "api": "https://metar.vatsim.net/",
@@ -88,6 +88,8 @@ METAR string \n
     }
 }
 ```
+
+> **NOTE:** Config file has to be in the same folder as executable, inside `./config/config.json`
 
 ## Manual setup
 ```bash

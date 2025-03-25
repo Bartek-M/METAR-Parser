@@ -84,7 +84,7 @@ func main() {
 		now := time.Now().UTC()
 		fmt.Print("\x1B[2J\x1B[1;1H") // clear terminal
 		fmt.Printf("METAR Parser - %s\n\n", fmt.Sprintf("%02d%02d%d0Z", now.Day(), now.Hour(), now.Minute()/10))
-		
+
 		metars := make(map[string]string)
 		for _, station := range conf.Stations {
 			fetched, err := fetchData(station, conf.API)

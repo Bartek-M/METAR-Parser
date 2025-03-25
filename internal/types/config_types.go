@@ -1,11 +1,11 @@
 package types
 
 type Config struct {
-	API             string
-	Interval        int
-	Stations        []string
-	ExcludeNoConfig bool
-	Minimums        Minimums
-	WindLimits      [2]int
-	Airports        map[string]Airport
+	API             string             `json:"api"`
+	Interval        int                `json:"interval"`
+	Stations        []string           `json:"stations"`
+	ExcludeNoConfig bool               `json:"excludeNoConfig"`
+	Minimums        Minimums           `json:"minimums"`
+	WindLimits      [2]int             `json:"windLimits"`
+	Airports        map[string]Airport `json:"airports"`
 }

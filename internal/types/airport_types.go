@@ -1,16 +1,16 @@
 package types
 
 type Airport struct {
-	Runways    []Runway
+	Runways    []Runway `json:"runways"`
 	Preference struct {
-		Dep []string
-		Arr []string
-	}
-	LVP [2]int
+		Dep []string `json:"dep"`
+		Arr []string `json:"arr"`
+	} `json:"preference"`
+	LVP [2]int `json:"lvp"`
 }
 
 type Runway struct {
-	Id  string
-	Hdg int
-	ILS bool
+	Id  string `json:"id"`
+	Hdg int    `json:"hdg"`
+	ILS bool   `json:"ils"`
 }
