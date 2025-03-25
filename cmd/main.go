@@ -9,6 +9,11 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"METAR-Parser/internal/config"
+	"METAR-Parser/internal/metar"
+	"METAR-Parser/internal/runways"
+	"METAR-Parser/internal/types"
 )
 
 func fetchData(station string, url string) ([]string, error) {
@@ -27,7 +32,7 @@ func fetchData(station string, url string) ([]string, error) {
 	return strings.Split(string(body), "\n"), nil
 }
 
-func filterData(data map[string]Weather, airports map[string]Airport) {
+func filterData(data map[string]types.Weather, airports map[string]types.Airport) {
 	for station := range data {
 		if _, exists := airports[station]; exists {
 			continue
@@ -36,7 +41,7 @@ func filterData(data map[string]Weather, airports map[string]Airport) {
 	}
 }
 
-func outputData(data map[string]Weather, minimums Minimums) {
+func outputData(data map[string]types.Weather, minimums types.Minimums) {
 	stations := make([]string, 0, len(data))
 	for station := range data {
 		stations = append(stations, station)
@@ -47,16 +52,16 @@ func outputData(data map[string]Weather, minimums Minimums) {
 		weather := data[station]
 
 		qnhInfo := ""
-		if weather.qnh != weather.lastQnh && weather.lastQnh != "" {
-			qnhInfo = fmt.Sprintf("%s -> %s | ", weather.lastQnh, weather.qnh)
+		if weather.Qnh != weather.LastQnh && weather.LastQnh != "" {
+			qnhInfo = fmt.Sprintf("| %s -> %s", weather.LastQnh, weather.Qnh)
 		}
 
 		category := ""
-		if weather.category >= 0 && weather.category < len(minimums.Category) {
-			category = minimums.Category[weather.category]
+		if weather.Category >= 0 && weather.Category < len(minimums.Category) {
+			category = minimums.Category[weather.Category]
 		}
 
-		fmt.Printf("%5s | %2s/%2s | %s%s\n", category, weather.depRwy, weather.arrRwy, qnhInfo, weather.metar)
+		fmt.Printf("%5s | %2s/%2s | %s %s\n", category, weather.DepRwy, weather.ArrRwy, weather.Metar, qnhInfo)
 	}
 }
 
@@ -69,55 +74,55 @@ func handleError(err error, message string) {
 }
 
 func main() {
-	config, err := openConfig()
+	conf, err := config.OpenConfig()
 	handleError(err, "Failed to load configuration")
-
-	data := make(map[string]Weather)
+	
+	data := make(map[string]types.Weather)
 	var lastMetars map[string]string
-
+	
 	for {
 		now := time.Now().UTC()
-		fmt.Print("\033[H\033[2J") // clear terminal
+		fmt.Print("\x1B[2J\x1B[1;1H") // clear terminal
 		fmt.Printf("METAR Parser - %s\n\n", fmt.Sprintf("%02d%02d%d0Z", now.Day(), now.Hour(), now.Minute()/10))
-
+		
 		metars := make(map[string]string)
-		for _, station := range config.Stations {
-			fetched, err := fetchData(station, config.API)
+		for _, station := range conf.Stations {
+			fetched, err := fetchData(station, conf.API)
 			handleError(err, "Failed to fetch API data")
 			
-			for _, metar := range fetched {
-				icao := strings.Split(metar, " ")[0]
-				metars[icao] = metar
+			for _, weather := range fetched {
+				icao := strings.Split(weather, " ")[0]
+				metars[icao] = weather
 			}
 		}
 
-		for station, metar := range metars {
-			if metar == lastMetars[station] {
+		for station, weather := range metars {
+			if weather == lastMetars[station] {
 				continue
 			}
 
-			parsed, err := parseMetar(metar, config.Minimums)
+			parsed, err := metar.ParseMetar(weather, conf.Minimums)
 			handleError(err, "Failed to parse METAR")
 
 			if _, exists := data[station]; exists {
-				parsed.lastQnh = data[station].qnh
+				parsed.LastQnh = data[station].Qnh
 			}
 			
-			assignRunways(parsed, config.WindLimits, config.Airports)
+			runways.AssignRunways(parsed, conf.WindLimits, conf.Airports)
 			data[station] = *parsed
 		}
 
-		if config.ExcludeNoConfig {
-			filterData(data, config.Airports)
+		if conf.ExcludeNoConfig {
+			filterData(data, conf.Airports)
 		}
-		outputData(data, config.Minimums)
+		outputData(data, conf.Minimums)
 		lastMetars = metars
 
-		if config.Interval == -1 {
+		if conf.Interval == -1 {
 			break
 		} 
 
-		time.Sleep(time.Duration(config.Interval * int(time.Second)))
+		time.Sleep(time.Duration(conf.Interval * int(time.Second)))
 	}
 
 	bufio.NewScanner(os.Stdin).Scan()

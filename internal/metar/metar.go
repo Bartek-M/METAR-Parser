@@ -1,28 +1,16 @@
-package main
+package metar
 
 import (
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"METAR-Parser/internal/types"
 )
 
-type Weather struct {
-	station   string
-	time      string
-	windDir   int
-	windSpeed int
-	qnh       string
-	lastQnh   string
-	vis       int
-	clouds    []int
-	depRwy    string
-	arrRwy    string
-	category  int
-	metar     string
-}
 
-func parseWind(metar string) (int, int, error) {
+func ParseWind(metar string) (int, int, error) {
 	reWind := regexp.MustCompile(`(\w{3})(\d{2})(G(\d{2}))?KT`)
 	wind := reWind.FindStringSubmatch(metar)
 
@@ -39,7 +27,7 @@ func parseWind(metar string) (int, int, error) {
 	return windDir, windSpeed, nil
 }
 
-func parseVisibility(metar string) (int, error) {
+func ParseVisibility(metar string) (int, error) {
 	if strings.Contains(metar, "CAVOK") {
 		return 9999, nil
 	}
@@ -51,7 +39,7 @@ func parseVisibility(metar string) (int, error) {
 	return vis, err
 }
 
-func parseClouds(metar string) []int {
+func ParseClouds(metar string) []int {
 	if strings.Contains(metar, "CAVOK") {
 		return []int{9999}
 	}
@@ -73,14 +61,14 @@ func parseClouds(metar string) []int {
 	return clouds
 }
 
-func parseQNH(metar string) string {
+func ParseQNH(metar string) string {
 	reQNH := regexp.MustCompile(`Q(\d{4})`)
 	qnh := reQNH.FindString(metar)
 
 	return qnh
 }
 
-func getCategory(visibility int, clouds []int, minimums Minimums) int {
+func GetCategory(visibility int, clouds []int, minimums types.Minimums) int {
 	for i := range 4 {
 		if visibility < minimums.Visibility[i] || clouds[0] < minimums.Ceiling[i] {
 			continue
@@ -92,37 +80,37 @@ func getCategory(visibility int, clouds []int, minimums Minimums) int {
 	return -1
 }
 
-func parseMetar(metar string, minimums Minimums) (*Weather, error) {
+func ParseMetar(metar string, minimums types.Minimums) (*types.Weather, error) {
 	splitMetar := strings.Split(metar, " ")
 
-	windDir, windSpeed, err := parseWind(metar)
+	windDir, windSpeed, err := ParseWind(metar)
 	if err != nil {
 		return nil, fmt.Errorf("failed parsing wind")
 	}
 
-	clouds := parseClouds(metar)
-	vis, err := parseVisibility(metar)
+	clouds := ParseClouds(metar)
+	vis, err := ParseVisibility(metar)
 	if err != nil {
 		return nil, fmt.Errorf("failed parsing visibility")
 	}
 
-	qnh := parseQNH(metar)
+	qnh := ParseQNH(metar)
 	if qnh == "" {
 		return nil, fmt.Errorf("failed parsing QNH")
 	}
 
-	return &Weather{
-		station:   splitMetar[0],
-		time:      splitMetar[1],
-		windDir:   windDir,
-		windSpeed: windSpeed,
-		qnh:       qnh,
-		lastQnh:   "",
-		vis:       vis,
-		clouds:    clouds,
-		depRwy:    "--",
-		arrRwy:    "--",
-		category:  getCategory(vis, clouds, minimums),
-		metar:     metar,
+	return &types.Weather{
+		Station:  splitMetar[0],
+		Time:     splitMetar[1],
+		WindDir:  windDir,
+		WindSpeed: windSpeed,
+		Qnh:      qnh,
+		LastQnh:  "",
+		Vis:      vis,
+		Clouds:   clouds,
+		DepRwy:   "--",
+		ArrRwy:   "--",
+		Category: GetCategory(vis, clouds, minimums),
+		Metar:    metar,
 	}, nil
 }
