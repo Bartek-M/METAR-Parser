@@ -101,3 +101,5 @@ Compiled application will land in current directory
 > **NOTE:** You need [Golang](https://go.dev/dl/) installed on your machine.
 > 
 > Remove `.exe` if you're using macOS / Linux
+
+<!-- GitAds-Verify: SK8UKSCOHTN5G2F5NMCOU13D5P22HS6N -->
