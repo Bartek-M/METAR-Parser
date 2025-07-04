@@ -10,6 +10,9 @@ METAR Parser - 010000Z
 
 > If you find any bugs, feel free to create a new issue in this repository.
 
+## GitAds Sponsored
+[![Sponsored by GitAds](https://gitads.dev/v1/ad-serve?source=bartek-m/metar-parser@github)](https://gitads.dev/v1/ad-track?source=bartek-m/metar-parser@github)
+
 ## New QNH
 When QNH change is detected during loop interval, additional information is added
 ```txt
